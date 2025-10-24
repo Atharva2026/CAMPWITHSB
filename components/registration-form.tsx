@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select"
+import { AddedParticipantsTable } from "./AddedParticipantsTable"
 
 const CAMPS = [
   { id: "nishtha-1", name: "Nishtha Camp 1", dates: "Dec 20 (AM) - Dec 24 (PM)" },
@@ -140,6 +141,7 @@ export default function RegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [email, setEmail] = useState(user?.primaryEmailAddress?.emailAddress || "")
   const [pocDetailsSaved, setPocDetailsSaved] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   const handleAddEntry = () => {
     setEntries([
@@ -167,8 +169,21 @@ export default function RegistrationForm() {
     ])
   }
 
-  const handleRemoveEntry = (index) => {
+  const handleRemoveEntry = (index: number) => {
     setEntries(entries.filter((_, i) => i !== index))
+    if (editingIndex === index) {
+      setEditingIndex(null)
+    } else if (editingIndex !== null && editingIndex > index) {
+      setEditingIndex(editingIndex - 1)
+    }
+  }
+
+  const handleEditEntry = (index: number) => {
+    setEditingIndex(index)
+  }
+
+  const handleUpdateEntry = () => {
+    setEditingIndex(null)
   }
 
   const handleEntryChange = (index, field, value) => {
@@ -177,16 +192,20 @@ export default function RegistrationForm() {
     setEntries(newEntries)
   }
 
+  const calculateCostForEntry = (entry: any) => {
+    return calculateCost(
+      entry.firstMealDate,
+      entry.firstMealType,
+      entry.lastMealDate,
+      entry.lastMealType,
+      entry.accommodation,
+      entry.participantType,
+    )
+  }
+
   const calculateTotalCost = () => {
     return entries.reduce((total, entry) => {
-      const cost = calculateCost(
-        entry.firstMealDate,
-        entry.firstMealType,
-        entry.lastMealDate,
-        entry.lastMealType,
-        entry.accommodation,
-        entry.participantType,
-      )
+      const cost = calculateCostForEntry(entry)
       return total + cost
     }, 0)
   }
@@ -208,21 +227,15 @@ export default function RegistrationForm() {
   const handlePaymentConfirm = async (paymentData) => {
     setIsSubmitting(true)
     try {
+      const entriesWithCost = entries.map((e) => ({
+        ...e,
+        entryCost: calculateCostForEntry(e),
+      }))
       const response = await fetch("/api/verify-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          entries: entries.map((e) => ({
-            ...e,
-            entryCost: calculateCost(
-              e.firstMealDate,
-              e.firstMealType,
-              e.lastMealDate,
-              e.lastMealType,
-              e.accommodation,
-              e.participantType,
-            ),
-          })),
+          entries: entriesWithCost,
           email,
           amount: totalCost,
           clerkUserId: user?.id,
@@ -255,6 +268,7 @@ export default function RegistrationForm() {
           },
         ])
         setSelectedPaymentMethod(null)
+        setPocDetailsSaved(false) // Reset POC details on successful registration
       }
     } catch (error) {
       console.error("Payment error:", error)
@@ -267,6 +281,9 @@ export default function RegistrationForm() {
   const handleSavePocDetails = () => {
     setPocDetailsSaved(true)
   }
+
+  const currentEntry = editingIndex !== null ? entries[editingIndex] : entries[entries.length - 1]
+  const currentEntryIndex = editingIndex !== null ? editingIndex : entries.length - 1
 
   return (
     <div className="min-h-screen bg-orange-100 py-12 px-4">
@@ -285,6 +302,7 @@ export default function RegistrationForm() {
                 onChange={setEmail}
                 placeholder="Enter your email"
                 required
+                readOnly={entries.length > 0}
               />
               <InputField
                 label="POC Name"
@@ -341,180 +359,196 @@ export default function RegistrationForm() {
           </Button>
         </div>
 
-        <div className="space-y-8">
-          {entries.map((entry, index) => (
-            <Card key={index} className="p-6 border-2 border-orange-300 bg-white shadow-md rounded-lg">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-orange-800">Participant {index + 1}</h2>
-                {entries.length > 1 && (
-                  <Button
-                    onClick={() => handleRemoveEntry(index)}
-                    className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md shadow-md transition-all duration-300"
-                  >
-                    Remove
-                  </Button>
-                )}
-              </div>
+        <Card className="p-6 border-2 border-orange-300 bg-white shadow-md rounded-lg">
+          <h2 className="text-2xl font-bold text-orange-800 mb-6">
+            {editingIndex !== null ? "Edit Participant" : "Add New Participant"}
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <InputField
+              label="Parent Temple"
+              id="parentTemple"
+              type="text"
+              value={currentEntry?.parentTemple}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "parentTemple", value)}
+              placeholder="Enter parent temple"
+            />
+            <InputField
+              label="Voice Name"
+              id="voiceName"
+              type="text"
+              value={currentEntry?.voiceName}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "voiceName", value)}
+              placeholder="Enter voice name"
+            />
+            <InputField
+              label="Counselor Name"
+              id="counselorName"
+              type="text"
+              value={currentEntry?.counselorName}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "counselorName", value)}
+              placeholder="Enter counselor name"
+            />
+          </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                <InputField
-                  label="Parent Temple"
-                  id={`parentTemple-${index}`}
-                  type="text"
-                  value={entry.parentTemple}
-                  onChange={(value) => handleEntryChange(index, "parentTemple", value)}
-                  placeholder="Enter parent temple"
-                />
-                <InputField
-                  label="Voice Name"
-                  id={`voiceName-${index}`}
-                  type="text"
-                  value={entry.voiceName}
-                  onChange={(value) => handleEntryChange(index, "voiceName", value)}
-                  placeholder="Enter voice name"
-                />
-                <InputField
-                  label="Counselor Name"
-                  id={`counselorName-${index}`}
-                  type="text"
-                  value={entry.counselorName}
-                  onChange={(value) => handleEntryChange(index, "counselorName", value)}
-                  placeholder="Enter counselor name"
-                />
-              </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <InputField
+              label="Participant Name"
+              id="participantName"
+              type="text"
+              value={currentEntry?.participantName}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "participantName", value)}
+              required
+              placeholder="Enter participant name"
+            />
+            <InputField
+              label="WhatsApp"
+              id="whatsapp"
+              type="tel"
+              value={currentEntry?.whatsapp}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "whatsapp", value)}
+              placeholder="Enter 10-digit WhatsApp number"
+            />
+            <InputField
+              label="Age"
+              id="age"
+              type="number"
+              value={currentEntry?.age}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "age", value)}
+              placeholder="Enter age"
+            />
+          </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                <InputField
-                  label="Participant Name"
-                  id={`participantName-${index}`}
-                  type="text"
-                  value={entry.participantName}
-                  onChange={(value) => handleEntryChange(index, "participantName", value)}
-                  required
-                  placeholder="Enter participant name"
-                />
-                <InputField
-                  label="WhatsApp"
-                  id={`whatsapp-${index}`}
-                  type="tel"
-                  value={entry.whatsapp}
-                  onChange={(value) => handleEntryChange(index, "whatsapp", value)}
-                  placeholder="Enter 10-digit WhatsApp number"
-                />
-                <InputField
-                  label="Age"
-                  id={`age-${index}`}
-                  type="number"
-                  value={entry.age}
-                  onChange={(value) => handleEntryChange(index, "age", value)}
-                  placeholder="Enter age"
-                />
-              </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <SelectField
+              label="Camp Name"
+              id="campName"
+              value={currentEntry?.campName}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "campName", value)}
+              options={CAMPS.map((camp) => ({ value: camp.id, label: camp.name }))}
+              placeholder="Select Camp"
+            />
+            <SelectField
+              label="Participant Type"
+              id="participantType"
+              value={currentEntry?.participantType}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "participantType", value)}
+              options={PARTICIPANT_TYPES.map((type) => ({ value: type, label: type }))}
+              placeholder="Select Participant Type"
+            />
+            <SelectField
+              label="Gender"
+              id="gender"
+              value={currentEntry?.gender}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "gender", value)}
+              options={GENDERS.map((gender) => ({ value: gender, label: gender }))}
+              placeholder="Select Gender"
+            />
+          </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                <SelectField
-                  label="Camp Name"
-                  id={`campName-${index}`}
-                  value={entry.campName}
-                  onChange={(value) => handleEntryChange(index, "campName", value)}
-                  options={CAMPS.map((camp) => ({ value: camp.id, label: camp.name }))}
-                  placeholder="Select Camp"
-                />
-                <SelectField
-                  label="Participant Type"
-                  id={`participantType-${index}`}
-                  value={entry.participantType}
-                  onChange={(value) => handleEntryChange(index, "participantType", value)}
-                  options={PARTICIPANT_TYPES.map((type) => ({ value: type, label: type }))}
-                  placeholder="Select Participant Type"
-                />
-                <SelectField
-                  label="Gender"
-                  id={`gender-${index}`}
-                  value={entry.gender}
-                  onChange={(value) => handleEntryChange(index, "gender", value)}
-                  options={GENDERS.map((gender) => ({ value: gender, label: gender }))}
-                  placeholder="Select Gender"
-                />
-              </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <SelectField
+              label="First Meal Date"
+              id="firstMealDate"
+              value={currentEntry?.firstMealDate}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "firstMealDate", value)}
+              options={DATES.map((date) => ({ value: date, label: date }))}
+              placeholder="Select Date"
+            />
+            <SelectField
+              label="First Meal Type"
+              id="firstMealType"
+              value={currentEntry?.firstMealType}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "firstMealType", value)}
+              options={MEAL_TYPES.map((type) => ({ value: type, label: type }))}
+              placeholder="Choose Meal Type"
+            />
+            <SelectField
+              label="Last Meal Date"
+              id="lastMealDate"
+              value={currentEntry?.lastMealDate}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "lastMealDate", value)}
+              options={DATES.map((date) => ({ value: date, label: date }))}
+              placeholder="Select Last Meal Date"
+            />
+            <SelectField
+              label="Last Meal Type"
+              id="lastMealType"
+              value={currentEntry?.lastMealType}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "lastMealType", value)}
+              options={MEAL_TYPES.map((type) => ({ value: type, label: type }))}
+              placeholder="Choose Meal Type"
+            />
+            <SelectField
+              label="Dinner Type"
+              id="dinnerType"
+              value={currentEntry?.dinnerType}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "dinnerType", value)}
+              options={MEAL_TYPES.map((type) => ({ value: type, label: type }))}
+              placeholder="Dinner Meal"
+            />
+            <SelectField
+              label="Accommodation"
+              id="accommodation"
+              value={currentEntry?.accommodation}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "accommodation", value)}
+              options={ACCOMMODATION_OPTIONS.map((option) => ({ value: option, label: option }))}
+              placeholder="Select Accommodation"
+            />
+            <InputField
+              label="Married Since Year"
+              id="marriedSinceYear"
+              type="number"
+              value={currentEntry?.marriedSinceYear}
+              onChange={(value) => handleEntryChange(currentEntryIndex, "marriedSinceYear", value)}
+              placeholder="Enter year"
+            />
+          </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                <SelectField
-                  label="First Meal Date"
-                  id={`firstMealDate-${index}`}
-                  value={entry.firstMealDate}
-                  onChange={(value) => handleEntryChange(index, "firstMealDate", value)}
-                  options={DATES.map((date) => ({ value: date, label: date }))}
-                  placeholder="Select Date"
-                />
-                <SelectField
-                  label="First Meal Type"
-                  id={`firstMealType-${index}`}
-                  value={entry.firstMealType}
-                  onChange={(value) => handleEntryChange(index, "firstMealType", value)}
-                  options={MEAL_TYPES.map((type) => ({ value: type, label: type }))}
-                  placeholder="Choose Meal Type"
-                />
-                <SelectField
-                  label="Last Meal Date"
-                  id={`lastMealDate-${index}`}
-                  value={entry.lastMealDate}
-                  onChange={(value) => handleEntryChange(index, "lastMealDate", value)}
-                  options={DATES.map((date) => ({ value: date, label: date }))}
-                  placeholder="Select Last Meal Date"
-                />
-                <SelectField
-                  label="Last Meal Type"
-                  id={`lastMealType-${index}`}
-                  value={entry.lastMealType}
-                  onChange={(value) => handleEntryChange(index, "lastMealType", value)}
-                  options={MEAL_TYPES.map((type) => ({ value: type, label: type }))}
-                  placeholder="Choose Meal Type"
-                />
-                <SelectField
-                  label="Dinner Type"
-                  id={`dinnerType-${index}`}
-                  value={entry.dinnerType}
-                  onChange={(value) => handleEntryChange(index, "dinnerType", value)}
-                  options={MEAL_TYPES.map((type) => ({ value: type, label: type }))}
-                  placeholder="Dinner Meal"
-                />
-                <SelectField
-                  label="Accommodation"
-                  id={`accommodation-${index}`}
-                  value={entry.accommodation}
-                  onChange={(value) => handleEntryChange(index, "accommodation", value)}
-                  options={ACCOMMODATION_OPTIONS.map((option) => ({ value: option, label: option }))}
-                  placeholder="Select Accommodation"
-                />
-              </div>
-              <div className="flex justify-end mt-6">
-                <Button
-                  onClick={handleAddEntry}
-                  className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2 px-6 rounded-md shadow-md transition-all duration-300"
-                >
-                  Add Entry
-                </Button>
-              </div>
-            </Card>
-          ))}
-
-          {/* Cost Summary and Payment Button */}
-          <Card className="p-6 border-2 border-orange-300 bg-white shadow-md rounded-lg">
-            <div className="flex justify-between items-center mb-6">
-              <p className="text-sm font-semibold text-orange-900">Total Cost</p>
-              <p className="text-3xl font-bold text-orange-700">₹{totalCost}</p>
-            </div>
-
-            <Button
-              onClick={() => setShowPaymentMethod(true)}
-              disabled={!email || entries.some((e) => !e.participantName) || !pocDetailsSaved}
-              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3 rounded-md shadow-md transition-all duration-300"
-            >
-              Proceed to Payment
-            </Button>
-          </Card>
+          <div className="flex justify-end mt-6">
+            {editingIndex !== null ? (
+              <Button
+                onClick={handleUpdateEntry}
+                className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-2 px-6 rounded-md shadow-md transition-all duration-300"
+              >
+                Update Participant
+              </Button>
+            ) : (
+              <Button
+                onClick={handleAddEntry}
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2 px-6 rounded-md shadow-md transition-all duration-300"
+              >
+                Add Entry
+              </Button>
+            )}
+          </div>
+        </Card>
+        
+        <div className="mt-8">
+          <AddedParticipantsTable
+            entries={entries.map((entry) => ({
+              ...entry,
+              entryCost: calculateCostForEntry(entry),
+            }))}
+            onEdit={handleEditEntry}
+            onRemove={handleRemoveEntry}
+          />
         </div>
+
+        {/* Cost Summary and Payment Button */}
+        <Card className="p-6 border-2 border-orange-300 bg-white shadow-md rounded-lg mt-8">
+          <div className="flex justify-between items-center mb-6">
+            <p className="text-sm font-semibold text-orange-900">Total Cost</p>
+            <p className="text-3xl font-bold text-orange-700">₹{totalCost}</p>
+          </div>
+
+          <Button
+            onClick={() => setShowPaymentMethod(true)}
+            disabled={entries.length === 0 || !email || entries.some((e) => !e.participantName) || !pocDetailsSaved}
+            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3 rounded-md shadow-md transition-all duration-300"
+          >
+            Proceed to Payment
+          </Button>
+        </Card>
       </div>
 
       {/* Payment Method Selection */}
@@ -540,7 +574,10 @@ export default function RegistrationForm() {
       {/* IDT Payment */}
       {selectedPaymentMethod === "idt" && (
         <PaymentConfirmation
-          entries={entries}
+          entries={entries.map((e) => ({
+            ...e,
+            entryCost: calculateCostForEntry(e),
+          }))}
           email={email}
           amount={totalCost}
           isSubmitting={isSubmitting}

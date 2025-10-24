@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Registration {
+  id                  Int       @id @default(autoincrement())
+  clerk_user_id       String    @db.VarChar(255)
+  email_id            String    @db.VarChar(255)
+  poc_name            String?   @db.VarChar(255)
+  poc_contact         String?   @db.VarChar(20)
+  voice_name          String?   @db.VarChar(255)
+  participant_name    String    @db.VarChar(255)
+  participant_type    String?   @db.VarChar(100)
+  gender              String    @default("NA") @db.VarChar(50)
+  whatsapp            String?   @db.VarChar(20)
+  parent_temple       String?   @db.VarChar(255)
+  counselor_name      String?   @db.VarChar(255)
+  camp_name           String    @db.VarChar(255)
+  first_meal_date     Int?
+  first_meal_type     String?   @db.VarChar(100)
+  last_meal_date      Int?
+  last_meal_type      String?   @db.VarChar(100)
+  dinner_type         String?   @db.VarChar(100)
+  accommodation       String?   @db.VarChar(100)
+  age                 Int?
+  married_since_year  Int?
+  amount              Decimal   @default(0) @db.Decimal(10, 2)
+  entry_cost          Decimal   @default(0) @db.Decimal(10, 2)
+  payment_id          String?   @db.VarChar(255)
+  payment_method      String?   @db.VarChar(50)
+  deduction_source    String?   @db.VarChar(255)
+  passcode            String?   @db.VarChar(255)
+  payment_status      String    @default("pending") @db.VarChar(50)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now()) @updatedAt
+
+  @@index([clerk_user_id])
+  @@index([email_id])
+  @@index([camp_name])
+  @@index([created_at])
+}
+
+model Payment {
+  id                    Int       @id @default(autoincrement())
+  clerk_user_id         String    @db.VarChar(255)
+  registration_id       Int?
+  razorpay_order_id     String?   @db.VarChar(255)
+  razorpay_payment_id   String?   @db.VarChar(255)
+  razorpay_signature    String?   @db.VarChar(255)
+  amount                Decimal   @db.Decimal(10, 2)
+  currency              String    @default("INR") @db.VarChar(10)
+  payment_method        String?   @db.VarChar(50)
+  payment_status        String    @default("pending") @db.VarChar(50)
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @default(now()) @updatedAt
+
+  @@index([clerk_user_id])
+  @@index([razorpay_payment_id])
+  @@index([created_at])
+}

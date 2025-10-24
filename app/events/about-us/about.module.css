@@ -1,0 +1,208 @@
+/* Fixed CSS syntax - removed invalid Tailwind class names and fixed proper CSS */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #fef3e2, #faf5f0, #fed7aa);
+  padding: 48px 16px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 48px;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(212, 165, 116, 0.1) 0%, rgba(155, 118, 83, 0.1) 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(212, 165, 116, 0.3);
+}
+
+.title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #6b4423;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #d4a574 0%, #9b7653 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 20px;
+  color: #9b7653;
+  font-weight: 500;
+}
+
+.section {
+  max-width: 1000px;
+  margin: 0 auto 48px;
+  padding: 32px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #e8d4c0;
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+}
+
+.sectionTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #6b4423;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.whoWeAre {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.whoWeAre p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #555;
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.valueCard {
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(212, 165, 116, 0.08) 0%, rgba(155, 118, 83, 0.08) 100%);
+  border: 2px solid #d4a574;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.valueCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(212, 165, 116, 0.2);
+}
+
+.valueIcon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.valueTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #6b4423;
+  margin-bottom: 8px;
+}
+
+.valueDescription {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.offeringsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.offeringCard {
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(155, 118, 83, 0.08) 0%, rgba(212, 165, 116, 0.08) 100%);
+  border: 2px solid #9b7653;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.offeringCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(155, 118, 83, 0.2);
+}
+
+.offeringIcon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.offeringTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #6b4423;
+  margin-bottom: 8px;
+}
+
+.offeringDescription {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.getInvolved {
+  text-align: center;
+}
+
+.getInvolved p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 24px;
+}
+
+.cta {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ctaButton {
+  display: inline-block;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #d4a574 0%, #9b7653 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 165, 116, 0.4);
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 36px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+  }
+
+  .section {
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .sectionTitle {
+    font-size: 24px;
+  }
+
+  .valuesGrid,
+  .offeringsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta {
+    flex-direction: column;
+  }
+
+  .ctaButton {
+    width: 100%;
+    text-align: center;
+  }
+}

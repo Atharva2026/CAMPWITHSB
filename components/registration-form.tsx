@@ -19,6 +19,15 @@ import {
   SelectValue,
 } from "./ui/select"
 import { AddedParticipantsTable } from "./AddedParticipantsTable"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog"
 
 const CAMPS = [
   { id: "nishtha-1", name: "Nishtha Camp 1", dates: "Dec 20 (AM) - Dec 24 (PM)" },
@@ -46,6 +55,38 @@ interface InputFieldProps {
   placeholder?: string
   required?: boolean
   readOnly?: boolean
+  maxLength?: number
+  inputMode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search"
+  pattern?: string
+}
+
+interface PaymentData {
+  razorpay_payment_id?: string
+  razorpay_order_id?: string
+  razorpay_signature?: string
+  // Add other payment related fields here as needed
+}
+
+interface Entry {
+  pocName: string
+  pocContact: string
+  voiceName: string
+  participantName: string
+  participantType: string
+  gender: string
+  whatsapp: string
+  parentTemple: string
+  counselorName: string
+  campName: string
+  firstMealDate: string
+  firstMealType: string
+  lastMealDate: string
+  lastMealType: string
+  dinnerType: string
+  accommodation: string
+  age: string
+  marriedSinceYear: string
+  [key: string]: string | number; // Add index signature
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -57,6 +98,9 @@ const InputField: React.FC<InputFieldProps> = ({
   placeholder,
   required = false,
   readOnly = false,
+  maxLength,
+  inputMode,
+  pattern,
 }) => (
   <div className="space-y-2">
     <Label htmlFor={id}>
@@ -70,6 +114,9 @@ const InputField: React.FC<InputFieldProps> = ({
       placeholder={placeholder}
       required={required}
       readOnly={readOnly}
+      maxLength={maxLength}
+      inputMode={inputMode}
+      pattern={pattern}
       className="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-orange-50 text-orange-900"
     />
   </div>
@@ -115,7 +162,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 export default function RegistrationForm() {
   const { user } = useUser()
   const router = useRouter() // Initialize useRouter
-  const [entries, setEntries] = useState([
+  const [entries, setEntries] = useState<Entry[]>([
     {
       pocName: "",
       pocContact: "",
@@ -139,11 +186,12 @@ export default function RegistrationForm() {
   ])
 
   const [showPaymentMethod, setShowPaymentMethod] = useState(false)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [email, setEmail] = useState(user?.primaryEmailAddress?.emailAddress || "")
   const [pocDetailsSaved, setPocDetailsSaved] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false) // State for success dialog
 
   const handleAddEntry = () => {
     setEntries([
@@ -188,13 +236,13 @@ export default function RegistrationForm() {
     setEditingIndex(null)
   }
 
-  const handleEntryChange = (index, field, value) => {
+  const handleEntryChange = (index: number, field: string, value: string | number) => {
     const newEntries = [...entries]
     newEntries[index][field] = value
     setEntries(newEntries)
   }
 
-  const calculateCostForEntry = (entry: any) => {
+  const calculateCostForEntry = (entry: Entry) => {
     return calculateCost(
       entry.firstMealDate,
       entry.firstMealType,
@@ -213,9 +261,9 @@ export default function RegistrationForm() {
   }
 
   const totalCost = calculateTotalCost()
-  const razorpayAmount = Math.round(totalCost * 1.02 * 100) // 2% surcharge
+  // const razorpayAmount = Math.round(totalCost * 1.02 * 100) // 2% surcharge
 
-  const handlePaymentMethodSelect = (method) => {
+  const handlePaymentMethodSelect = (method: string) => {
     setSelectedPaymentMethod(method)
     setShowPaymentMethod(false)
 
@@ -226,7 +274,7 @@ export default function RegistrationForm() {
     }
   }
 
-  const handlePaymentConfirm = async (paymentData) => {
+  const handlePaymentConfirm = async (paymentData: PaymentData) => {
     setIsSubmitting(true)
     try {
       const entriesWithCost = entries.map((e) => ({
@@ -246,7 +294,7 @@ export default function RegistrationForm() {
       })
 
       if (response.ok) {
-        alert("Registration successful!")
+        setShowSuccessDialog(true) // Open success dialog
         setEntries([
           {
             pocName: "",
@@ -271,7 +319,6 @@ export default function RegistrationForm() {
         ])
         setSelectedPaymentMethod(null)
         setPocDetailsSaved(false) // Reset POC details on successful registration
-        router.push("/dash") // Redirect to dashboard
       }
     } catch (error) {
       console.error("Payment error:", error)
@@ -302,7 +349,7 @@ export default function RegistrationForm() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={setEmail}
+                onChange={(value) => setEmail(value as string)}
                 placeholder="Enter your email"
                 required
                 readOnly={pocDetailsSaved}
@@ -315,14 +362,22 @@ export default function RegistrationForm() {
                 onChange={(value) => handleEntryChange(0, "pocName", value)}
                 placeholder="Enter POC name"
               />
-              <InputField
-                label="POC Contact no"
-                id="pocContact"
-                type="tel"
-                value={entries[0]?.pocContact}
-                onChange={(value) => handleEntryChange(0, "pocContact", value)}
-                placeholder="Enter 10-digit number"
-              />
+                <InputField
+                  label="POC Contact no"
+                  id="pocContact"
+                  type="tel"
+                  value={entries[0]?.pocContact}
+                  onChange={(value) => {
+                    // Allow only digits and max 10 characters
+                    const numericValue = String(value).replace(/\D/g, "").slice(0, 10);
+                    handleEntryChange(0, "pocContact", numericValue);
+                  }}
+                  placeholder="Enter 10-digit number"
+                  maxLength={10}
+                  inputMode="numeric"
+                  pattern="\d*"
+                />
+
               <div className="flex items-end justify-start">
                 <Button
                   onClick={handleSavePocDetails}
@@ -408,7 +463,11 @@ export default function RegistrationForm() {
               id="whatsapp"
               type="tel"
               value={currentEntry?.whatsapp}
-              onChange={(value) => handleEntryChange(currentEntryIndex, "whatsapp", value)}
+              onChange={(value) => {
+                // Allow only numbers and max 10 digits
+                const numericValue = String(value).replace(/\D/g, "").slice(0, 10);
+                handleEntryChange(currentEntryIndex, "whatsapp", numericValue);
+              }}
               placeholder="Enter 10-digit WhatsApp number"
             />
             <InputField
@@ -588,6 +647,25 @@ export default function RegistrationForm() {
           onCancel={() => setSelectedPaymentMethod(null)}
         />
       )}
+      {/* Success Dialog */}
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-bold text-orange-700">Registration Successful!</AlertDialogTitle>
+            <AlertDialogDescription className="text-orange-800">
+              Your registration has been successfully completed. You will now be redirected to the dashboard to view your registrations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => router.push("/dash")}
+              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-300"
+            >
+              Go to Dashboard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

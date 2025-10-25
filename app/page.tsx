@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
+import { Footer } from "@/components/Footer"
 
 interface Camp {
   id: string
@@ -62,16 +63,18 @@ export default function CampRegistration() {
       {/* Header */}
       <div className="text-center mb-16">
         <div className="inline-block mb-4">
-          <div className="text-6xl font-bold bg-gradient-to-r from-amber-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
+          <div className="text-7xl font-bold bg-gradient-to-r from-amber-600 via-purple-600 to-orange-500 bg-clip-text text-transparent -mb-4">
             ✨
           </div>
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold text-purple-900 mb-2">Spiritual Camp</h1>
-        <p className="text-xl text-purple-700 font-medium">Journey of Inner Awakening</p>
+        <h1 className="text-5xl md:text-6xl font-bold text-purple-900 mb-2 drop-shadow-lg">
+          Spiritual Camp
+        </h1>
+        <p className="text-xl text-purple-700 font-medium mb-16">Journey of Inner Awakening</p>
       </div>
 
       {/* Registration Section */}
-      <div className="max-w-6xl mx-auto mb-12">
+      <div className="max-w-6xl mx-auto mb-16">
         <h2 className="text-4xl font-bold text-center text-purple-900 mb-12">Camp Registration</h2>
 
         {/* Camps Grid */}
@@ -79,13 +82,17 @@ export default function CampRegistration() {
           {camps.map((camp) => (
             <Card
               key={camp.id}
-              className={`bg-gradient-to-br ${camp.color} border-2 border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 p-8 rounded-2xl`}
+              className={`bg-gradient-to-br ${camp.color} border-2 border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 p-10 rounded-2xl w-full`}
             >
-              <h3 className="text-2xl font-bold text-purple-900 mb-3">{camp.name}</h3>
-              <p className="text-sm font-semibold text-amber-700 mb-4">{camp.dates}</p>
-              <p className="text-gray-700 mb-6 leading-relaxed">{camp.description}</p>
+              <h3 className="text-3xl font-bold text-purple-900 mb-3">{camp.name}</h3>
+              <p className="text-lg font-semibold text-purple-700 mb-4 flex items-center">
+                <span className="mr-2">📅</span>{camp.dates}
+              </p>
+              <p className="text-gray-700 mb-6 leading-relaxed text-base flex items-center">
+                <span className="mr-2">👤</span>{camp.description}
+              </p>
               <Link href={isSignedIn ? "/register" : "/sign-in"}>
-                <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
+                <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
                   {isSignedIn ? "Register Now" : "Sign In to Register"}
                 </Button>
               </Link>
@@ -114,15 +121,15 @@ export default function CampRegistration() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto mb-12">
+      <section className="max-w-6xl mx-auto mb-12">
         <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-200">
-          <h3 className="text-3xl font-bold text-center text-purple-900 mb-8">Important Information</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="text-3xl font-bold text-center text-purple-900 mb-8">Important Information</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {policyLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 text-center"
+                className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 text-center flex items-center justify-center"
               >
                 <span className="text-purple-900 font-semibold hover:text-amber-600 transition-colors">
                   {link.name}
@@ -131,15 +138,12 @@ export default function CampRegistration() {
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Footer */}
-      <footer className="text-center mt-16 pt-8 border-t-2 border-purple-200">
-        <h3 className="text-2xl font-bold text-purple-900 mb-4">Welcome to VOICE Pune</h3>
-        <p className="text-purple-700 max-w-2xl mx-auto">
-          Join our spiritual camps and embark on a journey of inner awakening and personal growth
-        </p>
-      </footer>
+      {/* Glowing Gradient Divider */}
+      <div className="w-full h-1 bg-gradient-to-r from-orange-400 via-pink-400 to-purple-500 my-8 opacity-70 blur-sm"></div>
+
+      <Footer />
     </main>
   )
 }

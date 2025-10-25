@@ -42,29 +42,29 @@ export async function POST(request: Request) {
             clerk_user_id: clerkUserId,
             email_id: email,
             poc_name: entry.pocName || null,
-            poc_contact: entry.pocContact || null,
+            poc_contact: entry.pocContact ? String(entry.pocContact) : null, // Ensure string conversion
             voice_name: entry.voiceName || null,
             participant_name: entry.participantName,
-            participant_type: entry.participantType,
+            participant_type: entry.participantType || null,
             gender: entry.gender || "NA",
-            whatsapp: entry.whatsapp || null,
+            whatsapp: entry.whatsapp ? String(entry.whatsapp) : null, // Ensure string conversion
             parent_temple: entry.parentTemple || null,
             counselor_name: entry.counselorName || null,
             camp_name: entry.campName,
-            first_meal_date: Number.parseInt(entry.firstMealDate.split("-")[0]),
-            first_meal_type: entry.firstMealType,
-            last_meal_date: Number.parseInt(entry.lastMealDate.split("-")[0]),
-            last_meal_type: entry.lastMealType,
-            dinner_type: entry.dinnerType,
-            accommodation: entry.accommodation,
-            age: entry.age ? Number.parseInt(entry.age) : null,
-            married_since_year: entry.marriedSinceYear ? Number.parseInt(entry.marriedSinceYear) : null,
-            amount: entry.entryCost || 0,
-            entry_cost: entry.entryCost || 0,
+            first_meal_date: entry.firstMealDate ? Number.parseInt(String(entry.firstMealDate).split("-")[0]) : null, // Ensure string then int conversion
+            first_meal_type: entry.firstMealType || null,
+            last_meal_date: entry.lastMealDate ? Number.parseInt(String(entry.lastMealDate).split("-")[0]) : null, // Ensure string then int conversion
+            last_meal_type: entry.lastMealType || null,
+            dinner_type: entry.dinnerType || null,
+            accommodation: entry.accommodation || null,
+            age: entry.age ? Number.parseInt(String(entry.age)) : null, // Ensure string then int conversion
+            married_since_year: entry.marriedSinceYear ? Number.parseInt(String(entry.marriedSinceYear)) : null, // Ensure string then int conversion
+            amount: parseFloat(entry.entryCost) || 0,
+            entry_cost: parseFloat(entry.entryCost) || 0,
             payment_id: paymentMethod === "RAZORPAY" ? razorpay_payment_id : null,
             payment_method: paymentMethod,
-            deduction_source: paymentMethod === "IDT" ? deductionSource : null,
-            passcode: paymentMethod === "IDT" ? passcode : null,
+            deduction_source: paymentMethod === "IDT" ? deductionSource || null : null,
+            passcode: paymentMethod === "IDT" ? passcode || null : null,
             payment_status: "completed",
           },
         }),
@@ -78,16 +78,20 @@ export async function POST(request: Request) {
         razorpay_order_id: razorpay_order_id || null,
         razorpay_payment_id: razorpay_payment_id || null,
         razorpay_signature: razorpay_signature || null,
-        amount: amount,
+        amount: parseFloat(amount as any),
         payment_method: paymentMethod,
-        payment_status: "completed",
+        payment_status: "completed", // Ensure status is set correctly
       },
     })
 
     return NextResponse.json({
       success: true,
       message: "Payment verified and registrations saved",
-      registrations,
+      registrations: registrations.map((reg) => ({
+        ...reg,
+        amount: parseFloat(reg.amount as any), // Convert Decimal to float
+        entry_cost: parseFloat(reg.entry_cost as any), // Convert Decimal to float
+      })),
     })
   } catch (error) {
     console.error("Payment verification error:", error)

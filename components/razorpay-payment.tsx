@@ -23,7 +23,7 @@ export function RazorpayPayment({ amount, onConfirm, onCancel, isSubmitting, ema
       const amountInPaise = Math.round(numericAmount * 100)
       console.log("Amount in paise:", amountInPaise)
 
-      const orderResponse = await fetch("/api/Razorpay", {
+      const orderResponse = await fetch("/api/razorpay", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -53,12 +53,12 @@ export function RazorpayPayment({ amount, onConfirm, onCancel, isSubmitting, ema
         description: "Camp Registration Payment",
         order_id: orderData.id,
         prefill: {
-          name: "",
-          email: email || "",
-          contact: "",
+          name: "User Name", // Fallback for name
+          email: email || "test@example.com", // Ensure email is always a valid string
+          contact: "9999999999", // Fallback for contact
         },
         notes: {
-          email: email,
+          email: email || "test@example.com", // Ensure email is always a valid string
         },
         handler: (response) => {
           console.log("Payment successful:", response)

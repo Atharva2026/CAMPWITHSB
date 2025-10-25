@@ -10,6 +10,7 @@ import { PaymentMethodSelection } from "@/components/payment-method-selection"
 import calculateCost from "@/lib/calculate-cost"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
+import { useRouter } from "next/navigation"
 import {
   Select,
   SelectContent,
@@ -113,6 +114,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 
 export default function RegistrationForm() {
   const { user } = useUser()
+  const router = useRouter() // Initialize useRouter
   const [entries, setEntries] = useState([
     {
       pocName: "",
@@ -269,6 +271,7 @@ export default function RegistrationForm() {
         ])
         setSelectedPaymentMethod(null)
         setPocDetailsSaved(false) // Reset POC details on successful registration
+        router.push("/dash") // Redirect to dashboard
       }
     } catch (error) {
       console.error("Payment error:", error)
@@ -302,7 +305,7 @@ export default function RegistrationForm() {
                 onChange={setEmail}
                 placeholder="Enter your email"
                 required
-                readOnly={entries.length > 0}
+                readOnly={pocDetailsSaved}
               />
               <InputField
                 label="POC Name"

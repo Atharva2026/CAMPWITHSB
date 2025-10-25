@@ -15,7 +15,11 @@ export async function GET() {
       orderBy: { created_at: "desc" },
     })
 
-    return NextResponse.json(registrations)
+    return NextResponse.json(registrations.map((reg) => ({
+      ...reg,
+      amount: parseFloat(reg.amount as any),
+      entry_cost: parseFloat(reg.entry_cost as any),
+    })))
   } catch (error) {
     console.error("Error fetching registrations:", error)
     return NextResponse.json({ error: "Failed to fetch registrations" }, { status: 500 })

@@ -15,7 +15,13 @@ export default async function DashboardPage() {
     orderBy: { created_at: "desc" },
   })
 
-  const totalCost = registrations.reduce((sum, reg) => sum + Number(reg.amount || 0), 0)
+  const serializedRegistrations = registrations.map((reg) => ({
+    ...reg,
+    amount: parseFloat(reg.amount as any), // Convert Decimal to float
+    entry_cost: parseFloat(reg.entry_cost as any), // Convert Decimal to float
+  }))
 
-  return <DashboardClient registrations={registrations} totalCost={totalCost} />
+  const totalCost = serializedRegistrations.reduce((sum, reg) => sum + Number(reg.amount || 0), 0)
+
+  return <DashboardClient registrations={serializedRegistrations} totalCost={totalCost} />
 }

@@ -48,13 +48,15 @@ export default function FloatingNavbar() {
 
             <div className="hidden md:flex items-center gap-4">
               {isSignedIn ? (
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-10 h-10 rounded-full border-2 border-purple-300",
-                    },
-                  }}
-                />
+                <div className="py-2 px-3 w-full flex justify-start">
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-10 h-10 rounded-full border-2 border-purple-300",
+                      },
+                    }}
+                  />
+                </div>
               ) : (
                 <Link
                   href="/sign-in"
@@ -76,7 +78,7 @@ export default function FloatingNavbar() {
 
           {/* Mobile Navigation */}
           {isOpen && (
-            <div className="md:hidden mt-4 pt-4 border-t border-amber-200/30 flex flex-col gap-3">
+            <div className="md:hidden mt-4 pt-4 border-t border-amber-200/30 flex flex-col gap-3 overflow-x-hidden">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -93,7 +95,7 @@ export default function FloatingNavbar() {
               ) : (
                 <Link
                   href="/sign-in"
-                  className="text-gray-700 hover:text-amber-600 font-medium transition-colors py-2 px-3 rounded-lg hover:bg-amber-50"
+                  className="text-gray-700 hover:text-amber-600 font-medium transition-colors py-2 px-3 rounded-lg hover:bg-amber-50 w-full text-start"
                 >
                   Sign In
                 </Link>

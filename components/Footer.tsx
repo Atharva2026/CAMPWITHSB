@@ -3,7 +3,7 @@ import Link from "next/link"
 export function Footer() {
   return (
     <footer className="bg-white/60 backdrop-blur-md text-purple-900 py-12 rounded-t-3xl shadow-lg shadow-purple-200/50 mt-16">
-      <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+      <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
         <div className="col-span-full md:col-span-2 flex flex-col items-center md:items-start">
           <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-orange-400 bg-clip-text text-transparent">
             VOICE Pune
@@ -25,7 +25,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center md:items-start">
+        <div className="flex flex-col items-start">
           <h4 className="text-xl font-semibold text-purple-800 mb-4">Quick Links</h4>
           <ul className="space-y-2">
             <li>
@@ -46,7 +46,7 @@ export function Footer() {
           </ul>
         </div>
 
-        <div className="flex flex-col items-center md:items-start">
+        <div className="flex flex-col items-start">
           <h4 className="text-xl font-semibold text-purple-800 mb-4">Policies</h4>
           <ul className="space-y-2">
             <li>

@@ -46,6 +46,8 @@ const DATES = Array.from({ length: 18 }, (_, i) => {
   return `${date - 31}-Jan`
 })
 
+const DINNER_TYPES = ["Milk", "Dinner"]
+
 interface InputFieldProps {
   label: string
   id: string
@@ -85,7 +87,6 @@ interface Entry {
   dinnerType: string
   accommodation: string
   age: string
-  marriedSinceYear: string
   [key: string]: string | number; // Add index signature
 }
 
@@ -144,7 +145,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger
         id={id}
-        className="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-orange-50 text-orange-900 data-[placeholder]:text-orange-400"
+        className="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-orange-50 text-orange-900 data-[placeholder]:text-orange-900"
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
@@ -178,10 +179,9 @@ export default function RegistrationForm() {
       firstMealType: "Breakfast",
       lastMealDate: "24-Dec",
       lastMealType: "Dinner",
-      dinnerType: "Dinner Meal",
+      dinnerType: "",
       accommodation: "No",
       age: "",
-      marriedSinceYear: "",
     },
   ])
 
@@ -211,10 +211,9 @@ export default function RegistrationForm() {
         firstMealType: "Breakfast",
         lastMealDate: "24-Dec",
         lastMealType: "Dinner",
-        dinnerType: "Dinner Meal",
+        dinnerType: "",
         accommodation: "No",
         age: "",
-        marriedSinceYear: "",
       },
     ])
   }
@@ -311,10 +310,9 @@ export default function RegistrationForm() {
             firstMealType: "Breakfast",
             lastMealDate: "24-Dec",
             lastMealType: "Dinner",
-            dinnerType: "Dinner Meal",
+            dinnerType: "",
             accommodation: "No",
             age: "",
-            marriedSinceYear: "",
           },
         ])
         setSelectedPaymentMethod(null)
@@ -545,8 +543,8 @@ export default function RegistrationForm() {
               id="dinnerType"
               value={currentEntry?.dinnerType}
               onChange={(value) => handleEntryChange(currentEntryIndex, "dinnerType", value)}
-              options={MEAL_TYPES.map((type) => ({ value: type, label: type }))}
-              placeholder="Dinner Meal"
+              options={DINNER_TYPES.map((type) => ({ value: type, label: type }))}
+              placeholder="Milk or Dinner"
             />
             <SelectField
               label="Accommodation"
@@ -555,14 +553,6 @@ export default function RegistrationForm() {
               onChange={(value) => handleEntryChange(currentEntryIndex, "accommodation", value)}
               options={ACCOMMODATION_OPTIONS.map((option) => ({ value: option, label: option }))}
               placeholder="Select Accommodation"
-            />
-            <InputField
-              label="Married Since Year"
-              id="marriedSinceYear"
-              type="number"
-              value={currentEntry?.marriedSinceYear}
-              onChange={(value) => handleEntryChange(currentEntryIndex, "marriedSinceYear", value)}
-              placeholder="Enter year"
             />
           </div>
 

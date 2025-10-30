@@ -112,9 +112,7 @@ export default function AboutUs() {
             events and register today to start your transformative experience with VOICE Pune.
           </p>
           <div className={styles.cta}>
-            <a href="/dash" className={styles.ctaButton}>
-              Explore Our Events
-            </a>
+            
             <a href="/events/contact-us" className={styles.ctaButton}>
               Contact Us
             </a>
